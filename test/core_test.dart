@@ -69,5 +69,7 @@ class _Fake extends BatteryDriver {
   @override
   String get name => id;
   @override
+  BatteryCapabilities get capabilities => BatteryCapabilities.full;
+  @override
   Battery create(BleDevice device) => throw UnimplementedError();
 }

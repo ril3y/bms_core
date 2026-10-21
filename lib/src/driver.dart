@@ -2,6 +2,7 @@
 
 import 'package:universal_ble/universal_ble.dart';
 
+import 'capabilities.dart';
 import 'model.dart';
 import 'notice.dart';
 
@@ -50,6 +51,10 @@ abstract class BatteryDriver {
 
   BleSignature get signature;
 
+  /// What this family exposes (the baseline before connecting). A specific
+  /// battery may refine it per firmware via [Battery.capabilities].
+  BatteryCapabilities get capabilities;
+
   /// False for families listed for the roadmap but not implemented.
   bool get supported => true;
 
@@ -75,6 +80,9 @@ class PlannedDriver extends BatteryDriver {
   BleSignature get signature => BleSignature();
 
   @override
+  BatteryCapabilities get capabilities => const BatteryCapabilities();
+
+  @override
   bool get supported => false;
 
   @override
@@ -85,6 +93,10 @@ class PlannedDriver extends BatteryDriver {
 /// override [notices] for family-specific things the user should know or decide.
 abstract class Battery {
   BatteryDriver get driver;
+
+  /// What this connected battery exposes. Defaults to the family's baseline;
+  /// a driver overrides this to refine it once the firmware/model is known.
+  BatteryCapabilities get capabilities => driver.capabilities;
 
   /// Stable identifier used to key stored history.
   String get id;

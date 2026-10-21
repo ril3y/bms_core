@@ -4,6 +4,7 @@
 library;
 
 export 'src/ble_link.dart';
+export 'src/capabilities.dart';
 export 'src/driver.dart';
 export 'src/modbus.dart';
 export 'src/model.dart';
