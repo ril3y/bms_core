@@ -9,3 +9,4 @@ export 'src/driver.dart';
 export 'src/modbus.dart';
 export 'src/model.dart';
 export 'src/notice.dart';
+export 'src/secret.dart';
