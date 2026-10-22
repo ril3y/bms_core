@@ -14,6 +14,10 @@ class BleLink {
   final String notifyUuid;
   final String writeUuid;
 
+  /// Service holding the write characteristic, when it differs from the notify
+  /// service (e.g. Renogy writes on FFD0 but notifies on FFF0).
+  final String writeServiceUuid;
+
   /// Largest write per packet; 20 is safe before MTU negotiation.
   final int chunkSize;
   final bool writeWithResponse;
@@ -23,11 +27,13 @@ class BleLink {
     required String service,
     required String notify,
     required String write,
+    String? writeService,
     this.chunkSize = 20,
     this.writeWithResponse = false,
   })  : serviceUuid = normalizeUuid(service),
         notifyUuid = normalizeUuid(notify),
-        writeUuid = normalizeUuid(write);
+        writeUuid = normalizeUuid(write),
+        writeServiceUuid = normalizeUuid(writeService ?? service);
 
   BleCharacteristic? _tx;
   final List<StreamSubscription<dynamic>> _subs = [];
@@ -44,8 +50,11 @@ class BleLink {
     await device.connect();
     final services = await device.discoverServices();
     final svc = services.firstWhere((s) => normalizeUuid(s.uuid) == serviceUuid);
+    final writeSvc = writeServiceUuid == serviceUuid
+        ? svc
+        : services.firstWhere((s) => normalizeUuid(s.uuid) == writeServiceUuid);
     final rx = svc.characteristics.firstWhere((c) => normalizeUuid(c.uuid) == notifyUuid);
-    _tx = svc.characteristics.firstWhere((c) => normalizeUuid(c.uuid) == writeUuid);
+    _tx = writeSvc.characteristics.firstWhere((c) => normalizeUuid(c.uuid) == writeUuid);
     _subs.add(rx.onValueReceived.listen((v) => _incoming.add(Uint8List.fromList(v))));
     await rx.notifications.subscribe();
   }
